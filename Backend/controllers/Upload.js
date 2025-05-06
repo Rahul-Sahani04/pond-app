@@ -117,12 +117,26 @@ async function handleUploadImage(req, res) {
     // Delete the temporary file
     fs.unlinkSync(req.file.path);
 
+    // Get user-provided tags if any
+    let userTags = [];
+    if (req.body.tags) {
+      try {
+        userTags = JSON.parse(req.body.tags);
+      } catch (e) {
+        console.error("Error parsing user tags:", e);
+      }
+    }
+
     // Analyze the image with Gemini
     const { tags, description } = await analyzeContent(uploadResult.secure_url);
     console.log("Analysis result:", { tags, description });
 
+    // Merge AI and user tags, removing duplicates
+    const mergedTags = [...new Set([...userTags, ...tags])];
+    console.log("Merged tags:", mergedTags);
+
     // Add analysis results to uploadResult
-    uploadResult.tags = tags;
+    uploadResult.tags = mergedTags;
     uploadResult.description = description;
 
     // Store image info in the database
@@ -309,4 +323,62 @@ async function updateImageDescription(req, res) {
   }
 }
 
-export { handleUploadImage, handleAnalyzeImage, getUserImages, deleteImage, updateImageDescription };
+// Update image tags
+async function updateImageTags(req, res) {
+  const userId = req.user.id;
+  const { imageId } = req.params;
+  const { tags } = req.body;
+
+  if (!Array.isArray(tags)) {
+    return res.status(400).json({
+      success: false,
+      message: "Tags must be an array"
+    });
+  }
+
+  try {
+    // Find the image
+    const image = await Image.findById(imageId);
+    
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found"
+      });
+    }
+
+    // Check if user owns this image
+    if (image.author.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this image"
+      });
+    }
+
+    // Update the tags
+    image.tags = tags;
+    await image.save();
+    
+    // Return the updated image
+    return res.status(200).json({
+      success: true,
+      message: "Tags updated successfully",
+      image: {
+        _id: image._id,
+        url: image.url,
+        description: image.description,
+        additionalInfo: image.additionalInfo,
+        tags: image.tags,
+        createdAt: image.createdAt
+      }
+    });
+  } catch (error) {
+    console.error("Error updating image tags:", error);
+    return res.status(500).json({
+      success: false,
+      message: `Error occurred: ${error.message}`
+    });
+  }
+}
+
+export { handleUploadImage, handleAnalyzeImage, getUserImages, deleteImage, updateImageDescription, updateImageTags };

@@ -75,7 +75,7 @@ export const ImageProvider = ({ children }) => {
     }
   };
 
-  const uploadImage = async (imageUri) => {
+  const uploadImage = async (imageUri, tags = []) => {
     try {
       // Test connection first
       const isConnected = await testConnection();
@@ -99,6 +99,11 @@ export const ImageProvider = ({ children }) => {
       });
 
       const formData = new FormData();
+
+      // Add tags to formData
+      if (tags.length > 0) {
+        formData.append("tags", JSON.stringify(tags));
+      }
 
       // Handle base64 data URI
       if (imageUri.startsWith("data:")) {
@@ -161,7 +166,7 @@ export const ImageProvider = ({ children }) => {
   const addImage = async (image) => {
     try {
       // Upload to backend first
-      const uploadedImage = await uploadImage(image.uri);
+      const uploadedImage = await uploadImage(image.uri, image.tags);
 
       // Then add to local state
       const newImage = {

@@ -76,3 +76,5 @@ Backend/uploads/*
 # Misc
 .tmp/
 .temp/
+
+*/temp.txt

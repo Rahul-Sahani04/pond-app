@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Image as RNImage, ActivityIndicator } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image as RNImage, ActivityIndicator, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import darkTheme from '../themes/darkTheme';
@@ -10,6 +10,8 @@ const UploadScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentTag, setCurrentTag] = useState('');
+  const [tags, setTags] = useState([]);
   const { addImage } = useImages();
   
   const selectImage = async () => {
@@ -37,6 +39,7 @@ const UploadScreen = ({ navigation }) => {
         try {
           const imageId = await addImage({
             uri: imageUri,
+            tags: tags,
           });
           
           navigation.navigate('MainTabs', {
@@ -111,8 +114,63 @@ const UploadScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Tags Section */}
+        <View className="w-full mt-6 mb-4">
+          <Text className="text-base mb-2" style={{ color: darkTheme.textPrimary }}>Tags</Text>
+          <View className="flex-row items-center">
+            <TextInput
+              className="flex-1 px-4 py-2 rounded-lg mr-2"
+              style={{
+                backgroundColor: darkTheme.surface,
+                color: darkTheme.textPrimary,
+                borderColor: darkTheme.border,
+                borderWidth: 1
+              }}
+              placeholder="Add a tag..."
+              placeholderTextColor={darkTheme.textSecondary}
+              value={currentTag}
+              onChangeText={setCurrentTag}
+              onSubmitEditing={() => {
+                if (currentTag.trim()) {
+                  setTags([...tags, currentTag.trim()]);
+                  setCurrentTag('');
+                }
+              }}
+            />
+            <TouchableOpacity
+              className="px-4 py-2 rounded-lg"
+              style={{ backgroundColor: darkTheme.primary }}
+              onPress={() => {
+                if (currentTag.trim()) {
+                  setTags([...tags, currentTag.trim()]);
+                  setCurrentTag('');
+                }
+              }}
+            >
+              <Text style={{ color: darkTheme.textPrimary }}>Add</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Display Tags */}
+          <View className="flex-row flex-wrap gap-2 mt-3">
+            {tags.map((tag, index) => (
+              <TouchableOpacity
+                key={index}
+                className="flex-row items-center px-3 py-1 rounded-full"
+                style={{ backgroundColor: darkTheme.surface }}
+                onPress={() => {
+                  setTags(tags.filter((_, i) => i !== index));
+                }}
+              >
+                <Text style={{ color: darkTheme.textPrimary }}>{tag}</Text>
+                <Text style={{ color: darkTheme.textSecondary, marginLeft: 4 }}>×</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {/* Upload Tips */}
-        <View className="mt-8">
+        <View className="mt-4">
           <Text className="text-sm mb-2" style={{ color: darkTheme.textSecondary }}>
             Supported formats:
           </Text>

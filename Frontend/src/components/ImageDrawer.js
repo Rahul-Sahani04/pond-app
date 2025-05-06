@@ -29,6 +29,13 @@ const ImageDrawer = ({
     const saveTimeout = useRef(null);
     const [localDescription, setLocalDescription] = useState(imageData?.additionalInfo);
 
+    const [tags, setTags] = useState([]);
+
+    useEffect(() => {
+        if (imageData?.tags) {
+            setTags(imageData.tags);
+        }
+    }, [imageData]);
 
     const API_URL =
         process.env.EXPO_PUBLIC_API_URL || "http://192.168.31.21:3000/api";
@@ -73,11 +80,6 @@ const ImageDrawer = ({
         }
         return color;
     };
-
-    console.log("ImageDrawer - imageData:", imageData);
-
-    
-
 
     const saveDescription = useCallback(
         async (description) => {
@@ -146,10 +148,17 @@ const ImageDrawer = ({
     };
 
     const handleAddTag = async () => {
-        if (!newTag.trim()) return;
+        const tagToAdd = newTag.trim();
+        if (!tagToAdd) return;
+
+        // Check for duplicate tag
+        if (imageData.tags?.includes(tagToAdd)) {
+            alert('This tag already exists');
+            return;
+        }
 
         try {
-            const updatedTags = [...(imageData.tags || []), newTag.trim()];
+            const updatedTags = [...(imageData.tags || []), tagToAdd];
             await axios.put(
                 `${API_URL}/images/${imageData.id}/tags`,
                 { tags: updatedTags },
@@ -162,6 +171,7 @@ const ImageDrawer = ({
             updateImage(imageData.id, { tags: updatedTags });
             setNewTag("");
             setShowAddTagPrompt(false);
+            setTags(updatedTags);
         } catch (error) {
             console.error("Error adding tag:", error);
         }
@@ -296,7 +306,8 @@ const ImageDrawer = ({
 
                             {/* Tags List */}
                             <View className="flex-row flex-wrap gap-2">
-                                {imageData?.tags?.map((tag, index) => (
+                                {
+                                tags.map((tag, index) => (
                                     <View
                                         key={index}
                                         className="flex-row items-center px-3 py-1 rounded-full"
@@ -343,6 +354,8 @@ const ImageDrawer = ({
                                             value={newTag}
                                             onChangeText={setNewTag}
                                             autoFocus={true}
+                                            onSubmitEditing={handleAddTag}
+                                            returnKeyType="done"
                                         />
                                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                             <TouchableOpacity
