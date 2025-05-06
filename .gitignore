@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+*/node_modules/
+bun.lockb
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Build outputs
+build/
+dist/
+*.bundle
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*/.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output
+
+# Mobile app specific
+# iOS
+ios/build/
+ios/Pods/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.keystore
+!debug.keystore
+
+# Backend specific
+Backend/uploads/*
+!Backend/uploads/.gitkeep
+
+# Misc
+.tmp/
+.temp/

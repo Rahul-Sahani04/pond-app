@@ -1,0 +1,4 @@
+curl \
+  -d "name=pond-app&unsigned=true&tags=remote&allowed_formats=jpg,png,gif&folder=pond-app" \
+  -X POST \
+  https://457121268592165:BxIHWNWM6f2k_awrPQnRUd0jklA@api.cloudinary.com/v1_1/dxw8a1dzb/upload_presets 
